@@ -7,6 +7,7 @@ using GitHub.DistributedTask.WebApi;
 using GitHub.Runner.Worker;
 using GitHub.Runner.Worker.Container;
 using Moq;
+using Runner.Worker;
 using Xunit;
 using Pipelines = GitHub.DistributedTask.Pipelines;
 
@@ -469,6 +470,7 @@ namespace GitHub.Runner.Common.Tests.Worker
             // Mock pipeline directory manager
             _pipelineDirectoryManager = new Mock<IPipelineDirectoryManager>();
             hostContext.SetSingleton<IPipelineDirectoryManager>(_pipelineDirectoryManager.Object);
+            hostContext.SetSingleton<ILogger>(new FileLogger());
 
             // Execution context
             _ec = new Mock<IExecutionContext>();

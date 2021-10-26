@@ -9,6 +9,7 @@ using GitHub.Runner.Worker;
 using GitHub.Runner.Worker.Container;
 using GitHub.Runner.Worker.Handlers;
 using Moq;
+using Runner.Worker;
 using Xunit;
 using GitHub.DistributedTask.ObjectTemplating.Tokens;
 using Pipelines = GitHub.DistributedTask.Pipelines;
@@ -722,6 +723,8 @@ namespace GitHub.Runner.Common.Tests.Worker
 
             // Arrange: Create the execution context.
             hc.SetSingleton(new Mock<IJobServerQueue>().Object);
+
+            hc.SetSingleton<ILogger>(new FileLogger());
 
             return hc;
         }

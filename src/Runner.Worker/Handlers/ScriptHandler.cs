@@ -128,8 +128,7 @@ namespace GitHub.Runner.Worker.Handlers
             if (this.Environment?.Count > 0)
             {
                 ExecutionContext.Output("env:");
-                foreach (var env in this.Environment)
-                {
+                foreach (var env in this.Environment) {
                     ExecutionContext.Output($"  {env.Key}: {env.Value}");
                 }
             }
