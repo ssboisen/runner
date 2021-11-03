@@ -114,6 +114,10 @@ namespace GitHub.Runner.Worker.Container
             {
                 dockerOptions.Add($"--workdir {container.ContainerWorkDirectory}");
             }
+            if (!string.IsNullOrEmpty(container.ContainerUser))
+            {
+                dockerOptions.Add($"--user {container.ContainerUser}");
+            }
             if (!string.IsNullOrEmpty(container.ContainerNetwork))
             {
                 dockerOptions.Add($"--network {container.ContainerNetwork}");
@@ -218,6 +222,11 @@ namespace GitHub.Runner.Worker.Container
             if (!string.IsNullOrEmpty(container.ContainerEntryPoint))
             {
                 dockerOptions.Add($"--entrypoint \"{container.ContainerEntryPoint}\"");
+            }
+
+            if (!string.IsNullOrEmpty(container.ContainerUser))
+            {
+                dockerOptions.Add($"--user {container.ContainerUser}");
             }
 
             if (!string.IsNullOrEmpty(container.ContainerNetwork))

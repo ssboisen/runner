@@ -148,6 +148,13 @@ namespace GitHub.Runner.Worker.Handlers
                 container.ContainerEntryPointArgs = Inputs.GetValueOrDefault("args");
             }
 
+            if (Data.User != null)
+            {
+                container.ContainerUser =
+                    manifestManager.EvaluateContainerUser(ExecutionContext, Data.User, extraExpressionValues);
+
+            }
+
             if (Data.Environment != null)
             {
                 var evaluatedEnv = manifestManager.EvaluateContainerEnvironment(ExecutionContext, Data.Environment, extraExpressionValues);

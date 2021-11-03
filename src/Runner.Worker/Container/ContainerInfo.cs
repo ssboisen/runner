@@ -83,6 +83,7 @@ namespace GitHub.Runner.Worker.Container
         public string ContainerName { get; set; }
         public string ContainerEntryPointArgs { get; set; }
         public string ContainerEntryPoint { get; set; }
+        public string ContainerUser { get; set; }
         public string ContainerWorkDirectory { get; set; }
         public string ContainerCreateOptions { get; private set; }
         public string ContainerRuntimePath { get; set; }

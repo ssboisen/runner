@@ -1185,6 +1185,8 @@ namespace GitHub.Runner.Worker
 
         public MappingToken Environment { get; set; }
 
+        public BasicExpressionToken User { get; set; }
+
         public string Pre { get; set; }
 
         public string Post { get; set; }

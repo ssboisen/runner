@@ -24,6 +24,8 @@ namespace GitHub.Runner.Worker
 
         List<string> EvaluateContainerArguments(IExecutionContext executionContext, SequenceToken token, IDictionary<string, PipelineContextData> extraExpressionValues);
 
+        string EvaluateContainerUser(IExecutionContext executionContext, BasicExpressionToken token, IDictionary<string, PipelineContextData> extraExpressionValues);
+
         Dictionary<string, string> EvaluateContainerEnvironment(IExecutionContext executionContext, MappingToken token, IDictionary<string, PipelineContextData> extraExpressionValues);
 
         string EvaluateDefaultInput(IExecutionContext executionContext, string inputName, TemplateToken token);
@@ -56,7 +58,7 @@ namespace GitHub.Runner.Worker
             ActionDefinitionData actionDefinition = new();
 
             // Clean up file name real quick
-            // Instead of using Regex which can be computationally expensive, 
+            // Instead of using Regex which can be computationally expensive,
             // we can just remove the # of characters from the fileName according to the length of the basePath
             string basePath = HostContext.GetDirectory(WellKnownDirectory.Actions);
             string fileRelativePath = manifestFile;
@@ -226,6 +228,39 @@ namespace GitHub.Runner.Worker
             return result;
         }
 
+        public string EvaluateContainerUser(
+            IExecutionContext executionContext,
+            BasicExpressionToken token,
+            IDictionary<string, PipelineContextData> extraExpressionValues)
+        {
+            var result = "";
+
+            if (token != null)
+            {
+                var templateContext = CreateTemplateContext(executionContext, extraExpressionValues);
+                try
+                {
+                    var evaluateResult = TemplateEvaluator.Evaluate(templateContext, "container-runs-user", token, 0, null, omitHeader: true);
+                    templateContext.Errors.Check();
+
+                    Trace.Info($"Arguments evaluate result: {StringUtil.ConvertToJson(evaluateResult)}");
+
+                    var user = evaluateResult.AssertString("container user");
+
+                    result = user.Value;
+                }
+                catch (Exception ex) when (!(ex is TemplateValidationException))
+                {
+                    Trace.Error(ex);
+                    templateContext.Errors.Add(ex);
+                }
+
+                templateContext.Errors.Check();
+            }
+
+            return result;
+        }
+
         public Dictionary<string, string> EvaluateContainerEnvironment(
             IExecutionContext executionContext,
             MappingToken token,
@@ -359,6 +394,7 @@ namespace GitHub.Runner.Worker
             var imageToken = default(StringToken);
             var argsToken = default(SequenceToken);
             var entrypointToken = default(StringToken);
+            var userToken = default(BasicExpressionToken);
             var envToken = default(MappingToken);
             var mainToken = default(StringToken);
             var pluginToken = default(StringToken);
@@ -386,6 +422,9 @@ namespace GitHub.Runner.Worker
                         break;
                     case "entrypoint":
                         entrypointToken = run.Value.AssertString("entrypoint");
+                        break;
+                    case "user":
+                        userToken = run.Value as BasicExpressionToken;
                         break;
                     case "env":
                         envToken = run.Value.AssertMapping("env");
@@ -440,6 +479,7 @@ namespace GitHub.Runner.Worker
                             Image = imageToken.Value,
                             Arguments = argsToken,
                             EntryPoint = entrypointToken?.Value,
+                            User = userToken,
                             Environment = envToken,
                             Pre = preEntrypointToken?.Value,
                             InitCondition = preIfToken?.Value ?? "always()",

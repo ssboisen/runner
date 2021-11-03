@@ -57,6 +57,7 @@
                     "using": "non-empty-string",
                     "image": "non-empty-string",
                     "entrypoint": "non-empty-string",
+                    "user": "container-runs-user",
                     "args": "container-runs-args",
                     "env": "container-runs-env",
                     "pre-entrypoint": "non-empty-string",
@@ -65,6 +66,12 @@
                     "post-if": "non-empty-string"
                 }
             }
+        },
+        "container-runs-user": {
+            "context": [
+                "inputs"
+            ],
+            "string": {}
         },
         "container-runs-args": {
             "sequence": {

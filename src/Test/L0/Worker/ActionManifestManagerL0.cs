@@ -333,6 +333,51 @@ namespace GitHub.Runner.Common.Tests.Worker
         [Fact]
         [Trait("Level", "L0")]
         [Trait("Category", "Worker")]
+        public void Load_ContainerAction_Dockerfile_User_Expression()
+        {
+            try
+            {
+                //Arrange
+                Setup();
+
+                var actionManifest = new ActionManifestManager();
+                actionManifest.Initialize(_hc);
+
+                //Act
+                var result = actionManifest.Load(_ec.Object, Path.Combine(TestUtil.GetTestDataPath(), "dockerfileaction_user_expression.yml"));
+
+                //Assert
+
+                Assert.Equal("Hello World", result.Name);
+                Assert.Equal("Greet the world and record the time", result.Description);
+                Assert.Equal(2, result.Inputs.Count);
+                Assert.Equal("greeting", result.Inputs[0].Key.AssertString("key").Value);
+                Assert.Equal("Hello", result.Inputs[0].Value.AssertString("value").Value);
+                Assert.Equal("entryPoint", result.Inputs[1].Key.AssertString("key").Value);
+                Assert.Equal("", result.Inputs[1].Value.AssertString("value").Value);
+
+                Assert.Equal(ActionExecutionType.Container, result.Execution.ExecutionType);
+
+                var containerAction = result.Execution as ContainerActionExecutionData;
+
+                Assert.Equal("Dockerfile", containerAction.Image);
+                Assert.Equal("main.sh", containerAction.EntryPoint);
+                Assert.Equal("${{ inputs.greeting }}", containerAction.Arguments[0].ToString());
+                Assert.Equal("${{ inputs.entryPoint }}", containerAction.User.ToString());
+                Assert.Equal("Token", containerAction.Environment[0].Key.ToString());
+                Assert.Equal("foo", containerAction.Environment[0].Value.ToString());
+                Assert.Equal("Url", containerAction.Environment[1].Key.ToString());
+                Assert.Equal("${{ inputs.entryPoint }}", containerAction.Environment[1].Value.ToString());
+            }
+            finally
+            {
+                Teardown();
+            }
+        }
+
+        [Fact]
+        [Trait("Level", "L0")]
+        [Trait("Category", "Worker")]
         public void Load_ContainerAction_DockerHub()
         {
             try
@@ -753,6 +798,39 @@ namespace GitHub.Runner.Common.Tests.Worker
                 Assert.Equal("hello", result[0]);
                 Assert.Equal("test", result[1]);
                 Assert.Equal(2, result.Count);
+            }
+            finally
+            {
+                Teardown();
+            }
+        }
+
+        [Fact]
+        [Trait("Level", "L0")]
+        [Trait("Category", "Worker")]
+        public void Evaluate_ContainerAction_User()
+        {
+            try
+            {
+                //Arrange
+                Setup();
+
+                var actionManifest = new ActionManifestManager();
+                actionManifest.Initialize(_hc);
+
+                var user = new BasicExpressionToken(null, null, null, "inputs.user");
+
+                var inputsContext = new DictionaryContextData();
+                inputsContext.Add("user", new StringContextData("1270"));
+
+                var evaluateContext = new Dictionary<string, PipelineContextData>(StringComparer.OrdinalIgnoreCase);
+                evaluateContext["inputs"] = inputsContext;
+                //Act
+
+                var result = actionManifest.EvaluateContainerUser(_ec.Object, user, evaluateContext);
+
+                //Assert
+                Assert.Equal("1270", result);
             }
             finally
             {
