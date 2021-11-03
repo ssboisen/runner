@@ -43,9 +43,32 @@ namespace GitHub.Runner.Worker.Container
 
         public string DockerInstanceLabel { get; private set; }
 
+        private string _dockerUser = null;
         public override void Initialize(IHostContext hostContext)
         {
             base.Initialize(hostContext);
+
+#if OS_LINUX
+            var process = new Process
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = "/bin/id",
+                    RedirectStandardOutput = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                }
+            };
+
+            process.Start();
+            var idInfo = process.StandardOutput.ReadToEnd();
+            process.WaitForExit();
+            var match = Regex.Match(idInfo, "uid=(\\d+).+gid=(\\d+)");
+            var userId = match.Groups[1].Value;
+            var groupId = match.Groups[2].Value;
+            _dockerUser = $"{userId}:{groupId}";
+#endif
+
             DockerPath = WhichUtil.Which("docker", true, Trace);
             DockerInstanceLabel = IOUtil.GetSha256Hash(hostContext.GetDirectory(WellKnownDirectory.Root)).Substring(0, 6);
         }
@@ -229,29 +252,9 @@ namespace GitHub.Runner.Worker.Container
             {
                 dockerOptions.Add($"--user {container.ContainerUser}");
             }
-            else
+            else if(!string.IsNullOrEmpty(_dockerUser))
             {
-                #if OS_LINUX
-                var process = new Process
-                {
-                    StartInfo = new ProcessStartInfo
-                    {
-                        FileName = "/bin/id",
-                        RedirectStandardOutput = true,
-                        UseShellExecute = false,
-                        CreateNoWindow = true,
-                    }
-                };
-
-                process.Start();
-                string idInfo = process.StandardOutput.ReadToEnd();
-                process.WaitForExit();
-                var match = Regex.Match(idInfo, "uid=(\\d+).+gid=(\\d+)");
-                var userId = match.Groups[1].Value;
-                var groupId = match.Groups[2].Value;
-
-                dockerOptions.Add($"--user {userId}:{groupId}");
-                #endif
+                dockerOptions.Add($"--user {_dockerUser}");
             }
 
             if (!string.IsNullOrEmpty(container.ContainerNetwork))
