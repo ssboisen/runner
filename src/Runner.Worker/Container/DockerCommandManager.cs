@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -227,6 +228,30 @@ namespace GitHub.Runner.Worker.Container
             if (!string.IsNullOrEmpty(container.ContainerUser))
             {
                 dockerOptions.Add($"--user {container.ContainerUser}");
+            }
+            else
+            {
+                #if OS_LINUX
+                var process = new Process
+                {
+                    StartInfo = new ProcessStartInfo
+                    {
+                        FileName = "/bin/id",
+                        RedirectStandardOutput = true,
+                        UseShellExecute = false,
+                        CreateNoWindow = true,
+                    }
+                };
+
+                process.Start();
+                string idInfo = process.StandardOutput.ReadToEnd();
+                process.WaitForExit();
+                var match = Regex.Match(idInfo, "uid=(\\d+).+gid=(\\d+)");
+                var userId = match.Groups[1].Value;
+                var groupId = match.Groups[2].Value;
+
+                dockerOptions.Add($"--user {userId}:{groupId}");
+                #endif
             }
 
             if (!string.IsNullOrEmpty(container.ContainerNetwork))
