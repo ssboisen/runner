@@ -61,6 +61,8 @@ namespace Runner.Worker
 
             AddPair(actionsContext, "run_id", executionContext.GetGitHubContext("run_id"));
             AddPair(actionsContext, "run_number", executionContext.GetGitHubContext("run_number"));
+            AddPair(actionsContext, "run_attempt", executionContext.GetGitHubContext("run_attempt"));
+            AddPair(actionsContext, "repository", executionContext.GetGitHubContext("repository"));
             AddPair(actionsContext, "sha", executionContext.GetGitHubContext("sha"));
             AddPair(actionsContext, "ref", executionContext.GetGitHubContext("ref"));
             AddPair(actionsContext, "author", executionContext.GetGitHubContext("actor"));
