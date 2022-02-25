@@ -49,24 +49,27 @@ namespace GitHub.Runner.Worker.Container
             base.Initialize(hostContext);
 
 #if OS_LINUX
-            var process = new Process
+            if (!string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("GITHUB_LOOKUP_UID")))
             {
-                StartInfo = new ProcessStartInfo
+                var process = new Process
                 {
-                    FileName = "/bin/id",
-                    RedirectStandardOutput = true,
-                    UseShellExecute = false,
-                    CreateNoWindow = true,
-                }
-            };
+                    StartInfo = new ProcessStartInfo
+                    {
+                        FileName = "/usr/bin/id",
+                        RedirectStandardOutput = true,
+                        UseShellExecute = false,
+                        CreateNoWindow = true,
+                    }
+                };
 
-            process.Start();
-            var idInfo = process.StandardOutput.ReadToEnd();
-            process.WaitForExit();
-            var match = Regex.Match(idInfo, "uid=(\\d+).+gid=(\\d+)");
-            var userId = match.Groups[1].Value;
-            var groupId = match.Groups[2].Value;
-            _dockerUser = $"{userId}:{groupId}";
+                process.Start();
+                var idInfo = process.StandardOutput.ReadToEnd();
+                process.WaitForExit();
+                var match = Regex.Match(idInfo, "uid=(\\d+).+gid=(\\d+)");
+                var userId = match.Groups[1].Value;
+                var groupId = match.Groups[2].Value;
+                _dockerUser = $"{userId}:{groupId}";
+            }
 #endif
 
             DockerPath = WhichUtil.Which("docker", true, Trace);
@@ -137,10 +140,6 @@ namespace GitHub.Runner.Worker.Container
             if (!string.IsNullOrEmpty(container.ContainerWorkDirectory))
             {
                 dockerOptions.Add($"--workdir {container.ContainerWorkDirectory}");
-            }
-            if (!string.IsNullOrEmpty(container.ContainerUser))
-            {
-                dockerOptions.Add($"--user {container.ContainerUser}");
             }
             if (!string.IsNullOrEmpty(container.ContainerNetwork))
             {
