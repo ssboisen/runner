@@ -434,6 +434,7 @@ namespace GitHub.Runner.Listener
                             {
                                 if (autoUpdateInProgress == false)
                                 {
+                                    /*
                                     autoUpdateInProgress = true;
                                     var runnerUpdateMessage = JsonUtility.FromString<AgentRefreshMessage>(message.Body);
 #if DEBUG
@@ -460,6 +461,8 @@ namespace GitHub.Runner.Listener
                                     var selfUpdater = HostContext.GetService<ISelfUpdater>();
                                     selfUpdateTask = selfUpdater.SelfUpdate(runnerUpdateMessage, jobDispatcher, false, HostContext.RunnerShutdownToken);
                                     Trace.Info("Refresh message received, kick-off selfupdate background process.");
+                                    */
+                                    Trace.Info("Refresh message received, skip autoupdate since we ignore it.");
                                 }
                                 else
                                 {
