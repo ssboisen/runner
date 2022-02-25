@@ -22,7 +22,7 @@ _layout
 _layout_trims
 _package
 _package_trims
-_dotnetsdk
+_dotnetsdk*
 TestResults
 TestLogs
 .DS_Store
