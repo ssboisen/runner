@@ -81,6 +81,7 @@ mscorrc.dll
 msquic.dll
 netstandard.dll
 SOS_README.md
+Serilog.dll
 System.AppContext.dll
 System.Buffers.dll
 System.Collections.Concurrent.dll
