@@ -46,6 +46,8 @@ runsvc.sh
 Sdk.deps.json
 Sdk.dll
 Sdk.pdb
+Serilog.dll
+Serilog.Sinks.File.dll
 System.IdentityModel.Tokens.Jwt.dll
 System.Net.Http.Formatting.dll
 System.Security.Cryptography.Pkcs.dll
