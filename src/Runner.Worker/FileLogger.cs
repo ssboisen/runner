@@ -32,7 +32,7 @@ namespace Runner.Worker
 
             _logger = new LoggerConfiguration()
                 .MinimumLevel.Information()
-                .WriteTo.File(new JsonFormatter(), logFilePath, rollOnFileSizeLimit: true, retainedFileCountLimit: 20 )
+                .WriteTo.File(new JsonFormatter(), logFilePath, rollOnFileSizeLimit: true, retainedFileCountLimit: 5 )
                 .CreateLogger();
         }
 
